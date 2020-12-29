@@ -1,0 +1,84 @@
+---
+title: "PROJECT1"
+author: "Mboya"
+date: "1/31/2020"
+ setwd("C:/Users/mboya/OneDrive/Desktop/R TRAINING/PROJECT1 SOLUTIONS")
+output: html_document
+---
+
+```{r include=FALSE}
+library(tidyverse)
+library(scales)
+library()
+
+#####0.LOADING DATA
+mobilemoney_data<-read_csv("https://raw.githubusercontent.com/vmandela99/Project1/master/mobilemoney_data.csv")
+
+#####1.CLEANING DATA
+clean_data <- mobilemoney_data
+
+#####2.SELECTING VARIABLES AGE,GENDER,EDUCATION LEVEL AND NUMBER OF HOUSEHOLD MEMBERS.THEN WRITING IN NEW AND SEPARATE FILE "DEMOGRAPHICS"
+```
+
+
+```{r echo=FALSE}
+#####viewing the data names
+names(clean_data)
+```
+```{r echo=FALSE}
+#####Extracting varaibles of interest
+demographics_1 <- clean_data%>%select(7:10)
+```
+
+#####4.CONDUCTING AN EXPLANTORY ANALYSIS OF THE DATA
+```{r echo=FALSE}
+skimr::skim(clean_data)
+
+```
+
+```{r echo=TRUE}
+##count
+demographics_1%>%count(gender,name = "frequency")%>%mutate(percent=round(frequency/sum(frequency),4)*100)%>%knitr::kable(caption = "Table Showing Frequency of Gender",col.names = c("Gender","Frequency","Percentage"))
+
+
+```
+from the data the number of females are 38 with a total percentage of 31.9 and the number of males are 81 with a total percentage of 68.07
+
+```{r echo=TRUE}
+demographics_1%>%count(factor(hh_members))%>%rename(members='factor(hh_members)')%>%mutate(percentage=round(n/sum(n),4)*100,members=fct_reorder(members,n))%>%ggplot(aes(x=members,y= percentage))+geom_col(fill="purple")+coord_flip()+labs(x="number of household members",y="percentage of frequency",title ="In most houses how many people live there?",subtitle = "most households have 3 to 4 members")
+
+```
+
+#####During the survey, participants listed all the different types of financial accounts that they have registered. The resulting data has a format where there is one observation per account type. Formating the data so that there is now one observation participant and Saving data as mobile_new.csv
+#####wrirting the account type as column as using the account number values
+clean_data%>%pivot_wider(names_from=account_type,values_from=account_num)->mobile_new
+
+#to write the new data set
+#write.csv(moile_new,"mobile_new.csv")
+
+
+#####5.To describe how the moile money market is divided between the three companies.To include atleast one chart or table to illustrateyour answer
+
+```{r}
+clean_data%>%ggplot(aes(x=mm_account_telco_main,y=1,fill=account_type))+geom_col(position = "stack")+labs(y="frequency of bank accounts",x="Type of company",title = "How Is The Mobile Money Maret Divided Between The Three Companies?")
+```
+
+#####To Develop A Cross Tabulation (in percentages) With Gender As The Rows And Columns With Urban, mm_trust and prefer_cash.
+
+```{r include=FALSE}
+cross_data<-clean_data%>%select(gender,urban,mm_trust,prefer_cash)
+
+new_cross <- cross_data%>%mutate(urban1=as.numeric(fct_anon(factor(urban))))
+mm_trust1=as.numeric(fct_anon(factor(mm_trust)))
+prefer_cash1=as.numeric(ft_anon(facor(prefer_cash)))
+
+new_cross%>%group_by(gender)%>%sumarise(urban_percentage=sum(urban1))
+
+```
+
+#####Ploting The Graph Of Gender And mm_account In The Same Bar Graph And Clearly Label Your Axis
+
+```{r}
+mobilemoney_data%>%ggplot(aes(x=gender,y=1,fill=mm_account))+geom_col(position = "stack")+labs(x="Gender of the Respondents",y="Frequency",title="How Many People Have Accounts ByGender?",subtitle="78.6% of males had accounts as comparedto 61%.38.1% of women had no accounts as compared to 21.4%")
+```
+
